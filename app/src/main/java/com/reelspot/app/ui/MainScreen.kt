@@ -12,8 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,12 +40,17 @@ enum class ScreenRoute(val title: String) {
 @Composable
 fun MainScreen(viewModel: ReelSpotViewModel) {
     var currentRoute by remember { mutableStateOf(ScreenRoute.HOME) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val savedPlaces by viewModel.savedPlaces.collectAsState()
+    val folders by viewModel.folders.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
     val nearbyPlaces by viewModel.nearbyPlaces.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val selectedFolderId by viewModel.selectedFolderId.collectAsState()
+    val selectedTag by viewModel.selectedTag.collectAsState()
+    val sortOption by viewModel.sortOption.collectAsState()
     val selectedPlaceForDetails by viewModel.selectedPlaceForDetails.collectAsState()
     val isAddEditSheetOpen by viewModel.isAddEditSheetOpen.collectAsState()
     val editingPlace by viewModel.editingPlace.collectAsState()
@@ -50,6 +58,16 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
     val searchResults by viewModel.searchResults.collectAsState()
     val isSearchingAddress by viewModel.isSearchingAddress.collectAsState()
     val sharedReelUrl by viewModel.sharedReelUrl.collectAsState()
+    val duplicateWarning by viewModel.duplicateWarning.collectAsState()
+    val userFeedbackMessage by viewModel.userFeedbackMessage.collectAsState()
+
+    // Display user feedback messages (saving, tag, folder changes)
+    LaunchedEffect(userFeedbackMessage) {
+        userFeedbackMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.clearFeedbackMessage()
+        }
+    }
 
     PermissionHandler(
         onPermissionsGranted = {
@@ -57,6 +75,7 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
         }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             bottomBar = {
                 NavigationBar {
                     NavigationBarItem(
@@ -113,11 +132,21 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                     ScreenRoute.SAVED -> {
                         SavedPlacesScreen(
                             savedPlaces = savedPlaces,
+                            folders = folders,
                             currentLocation = currentLocation,
                             searchQuery = searchQuery,
                             selectedCategory = selectedCategory,
+                            selectedFolderId = selectedFolderId,
+                            selectedTag = selectedTag,
+                            sortOption = sortOption,
                             onSearchQueryChange = { viewModel.setSearchQuery(it) },
                             onCategorySelect = { viewModel.setSelectedCategory(it) },
+                            onFolderSelect = { viewModel.setSelectedFolder(it) },
+                            onTagSelect = { viewModel.setSelectedTag(it) },
+                            onSortSelect = { viewModel.setSortOption(it) },
+                            onCreateFolder = { viewModel.createFolder(it) },
+                            onRenameFolder = { id, name -> viewModel.renameFolder(id, name) },
+                            onDeleteFolder = { viewModel.deleteFolder(it) },
                             onPlaceClick = { place -> viewModel.selectPlaceDetails(place) },
                             onEditPlace = { place -> viewModel.openEditPlaceSheet(place) },
                             onDeletePlace = { place -> viewModel.deletePlace(place) }
@@ -128,13 +157,17 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
         }
 
         // Share Reel Confirmation Sheet (shown when URL arrives via Android share intent)
-        sharedReelUrl?.let { _ ->
+        sharedReelUrl?.let { url ->
             ShareReelConfirmSheet(
-                sharedUrl = sharedReelUrl ?: "",
+                sharedUrl = url,
+                duplicatePlace = duplicateWarning,
                 onConfirm = { confirmedUrl ->
-                    // Clear the shared state and open AddEditPlaceSheet with the confirmed URL
                     viewModel.clearSharedReelUrl()
                     viewModel.openAddPlaceSheet(initialReelUrl = confirmedUrl)
+                },
+                onViewExisting = { existing ->
+                    viewModel.clearSharedReelUrl()
+                    viewModel.selectPlaceDetails(existing)
                 },
                 onDismiss = { viewModel.clearSharedReelUrl() }
             )
@@ -146,9 +179,13 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                 editingPlace = editingPlace,
                 initialReelUrl = pastedReelUrl,
                 currentLocation = currentLocation,
+                folders = folders,
+                duplicateWarning = duplicateWarning,
+                onCheckDuplicateUrl = { url, id -> viewModel.checkDuplicateReelUrl(url, id) },
+                onCreateFolder = { name -> viewModel.createFolder(name) },
                 onDismiss = { viewModel.closeAddEditSheet() },
-                onSave = { id, name, description, category, lat, lng, radius, url ->
-                    viewModel.savePlace(id, name, description, category, lat, lng, radius, url)
+                onSave = { id, name, description, category, lat, lng, radius, url, tags, folderId ->
+                    viewModel.savePlace(id, name, description, category, lat, lng, radius, url, tags, folderId)
                 },
                 onSearchAddress = { query -> viewModel.searchAddressQuery(query) },
                 searchResults = searchResults,
@@ -168,10 +205,15 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
 
             PlaceDetailSheet(
                 place = place,
+                folders = folders,
                 currentDistanceMeters = dist,
                 onDismiss = { viewModel.selectPlaceDetails(null) },
                 onEdit = { p -> viewModel.openEditPlaceSheet(p) },
-                onDelete = { p -> viewModel.deletePlace(p) }
+                onDelete = { p -> viewModel.deletePlace(p) },
+                onMoveToFolder = { placeId, folderId -> viewModel.movePlaceToFolder(placeId, folderId) },
+                onAddTag = { placeId, tag -> viewModel.addTagToPlace(placeId, tag) },
+                onRemoveTag = { placeId, tag -> viewModel.removeTagFromPlace(placeId, tag) },
+                onCreateFolder = { name -> viewModel.createFolder(name) }
             )
         }
     }

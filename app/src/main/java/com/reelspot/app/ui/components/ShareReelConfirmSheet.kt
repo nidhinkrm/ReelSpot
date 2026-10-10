@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,21 +38,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.reelspot.app.data.SavedPlace
 
 /**
  * Bottom sheet that appears when the user shares an Instagram reel URL
  * (or any text URL) to the ReelSpot app via the Android share sheet.
  *
- * Shows the received URL for confirmation, lets the user edit it,
- * then proceeds to the full AddEditPlaceSheet or discards.
+ * Shows the received URL for confirmation, indicates if already saved,
+ * and proceeds to save or edit.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareReelConfirmSheet(
     /** The URL originally received from the share intent */
     sharedUrl: String,
+    /** Existing place if this reel is already saved */
+    duplicatePlace: SavedPlace? = null,
     /** User tapped "Save Spot" – proceed to AddEditPlaceSheet with this URL */
     onConfirm: (url: String) -> Unit,
+    /** User wants to view the existing saved place */
+    onViewExisting: ((SavedPlace) -> Unit)? = null,
     /** User dismissed without saving */
     onDismiss: () -> Unit
 ) {
@@ -104,6 +113,50 @@ fun ShareReelConfirmSheet(
                 }
             }
 
+            // Duplicate Reel Warning Card
+            if (duplicatePlace != null) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Reel Already Saved",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "This reel is already in your saved spots as \"${duplicatePlace.name}\".",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        if (onViewExisting != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedButton(
+                                onClick = { onViewExisting(duplicatePlace) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("View Existing Spot")
+                            }
+                        }
+                    }
+                }
+            }
+
             // Editable URL field
             OutlinedTextField(
                 value = editableUrl,
@@ -121,7 +174,7 @@ fun ShareReelConfirmSheet(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Preview of the cleaned URL (just the domain + path, truncated)
+            // Preview of the cleaned URL
             if (editableUrl.isNotBlank()) {
                 Text(
                     text = editableUrl,
@@ -164,7 +217,7 @@ fun ShareReelConfirmSheet(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Save Spot")
+                    Text(if (duplicatePlace != null) "Save Anyway" else "Save Spot")
                 }
             }
         }

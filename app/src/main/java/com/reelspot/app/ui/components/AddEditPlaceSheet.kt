@@ -33,7 +33,9 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,6 +46,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import com.reelspot.app.data.PlaceFolder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -96,6 +100,10 @@ fun AddEditPlaceSheet(
     editingPlace: SavedPlace?,
     initialReelUrl: String,
     currentLocation: Location? = null,
+    folders: List<PlaceFolder> = emptyList(),
+    duplicateWarning: SavedPlace? = null,
+    onCheckDuplicateUrl: ((String, Long) -> Unit)? = null,
+    onCreateFolder: ((String) -> Unit)? = null,
     onDismiss: () -> Unit,
     onSave: (
         id: Long,
@@ -105,7 +113,9 @@ fun AddEditPlaceSheet(
         latitude: Double,
         longitude: Double,
         radius: Float,
-        reelUrl: String?
+        reelUrl: String?,
+        tags: String,
+        folderId: Long?
     ) -> Unit,
     onSearchAddress: (String) -> Unit,
     searchResults: List<Address>,
@@ -121,6 +131,10 @@ fun AddEditPlaceSheet(
     var selectedCategory by rememberSaveable { mutableStateOf(editingPlace?.category ?: "Food") }
     var selectedRadius by rememberSaveable { mutableFloatStateOf(editingPlace?.radius ?: 500f) }
     var reelUrl by rememberSaveable { mutableStateOf(editingPlace?.reelUrl ?: initialReelUrl) }
+    var selectedFolderId by rememberSaveable { mutableStateOf(editingPlace?.folderId) }
+    var tagsList by rememberSaveable { mutableStateOf(editingPlace?.tagList ?: emptyList()) }
+    var newTagInput by rememberSaveable { mutableStateOf("") }
+    var isCreateFolderDialogOpen by remember { mutableStateOf(false) }
 
     val defaultLat = editingPlace?.latitude
         ?: currentLocation?.latitude
@@ -182,6 +196,13 @@ fun AddEditPlaceSheet(
         addressText = onGetAddressFromLatLng(selectedLat, selectedLng)
     }
 
+    // Check duplicate reel URL
+    LaunchedEffect(reelUrl) {
+        if (reelUrl.isNotBlank()) {
+            onCheckDuplicateUrl?.invoke(reelUrl, editingPlace?.id ?: 0L)
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = attemptDismiss,
         sheetState = sheetState
@@ -213,7 +234,10 @@ fun AddEditPlaceSheet(
             // Instagram Reel URL Input
             OutlinedTextField(
                 value = reelUrl,
-                onValueChange = { reelUrl = it },
+                onValueChange = {
+                    reelUrl = it
+                    onCheckDuplicateUrl?.invoke(it, editingPlace?.id ?: 0L)
+                },
                 label = { Text("Instagram Reel URL (Optional)") },
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Link, contentDescription = "Reel Link")
@@ -221,17 +245,22 @@ fun AddEditPlaceSheet(
                 trailingIcon = {
                     Row {
                         if (reelUrl.isNotEmpty()) {
-                            IconButton(onClick = { reelUrl = "" }) {
+                            IconButton(onClick = {
+                                reelUrl = ""
+                                onCheckDuplicateUrl?.invoke("", editingPlace?.id ?: 0L)
+                            }) {
                                 Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear")
                             }
                         }
                         IconButton(onClick = {
                             clipboardManager.getText()?.text?.let { text ->
-                                if (ReelProcessor.isValidInstagramUrl(text)) {
-                                    reelUrl = ReelProcessor.cleanUrl(text)
+                                val cleaned = if (ReelProcessor.isValidInstagramUrl(text)) {
+                                    ReelProcessor.cleanUrl(text)
                                 } else {
-                                    reelUrl = text
+                                    text
                                 }
+                                reelUrl = cleaned
+                                onCheckDuplicateUrl?.invoke(cleaned, editingPlace?.id ?: 0L)
                             }
                         }) {
                             Icon(imageVector = Icons.Default.ContentPaste, contentDescription = "Paste")
@@ -241,6 +270,36 @@ fun AddEditPlaceSheet(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
+            // Duplicate Reel Warning Banner
+            if (duplicateWarning != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Reel already saved as \"${duplicateWarning.name}\"",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -310,6 +369,102 @@ fun AddEditPlaceSheet(
                                 500f -> "500 m"
                                 1000f -> "1 km"
                                 else -> "2 km"
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Folder Selection
+            Text(
+                text = "Folder / Category",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedFolderId == null,
+                    onClick = { selectedFolderId = null },
+                    label = { Text("None (Uncategorized)") }
+                )
+                folders.forEach { folder ->
+                    FilterChip(
+                        selected = selectedFolderId == folder.id,
+                        onClick = { selectedFolderId = folder.id },
+                        label = { Text(folder.name) }
+                    )
+                }
+                AssistChip(
+                    onClick = { isCreateFolderDialogOpen = true },
+                    label = { Text("+ New Folder") }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Custom Tags Section
+            Text(
+                text = "Custom Tags",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = newTagInput,
+                    onValueChange = { newTagInput = it },
+                    placeholder = { Text("e.g. Kerala Trip, Must Watch") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(
+                    onClick = {
+                        val clean = newTagInput.trim().removePrefix("#")
+                        if (clean.isNotBlank() && !tagsList.any { it.equals(clean, ignoreCase = true) }) {
+                            tagsList = tagsList + clean
+                            newTagInput = ""
+                        }
+                    },
+                    enabled = newTagInput.isNotBlank()
+                ) {
+                    Text("Add")
+                }
+            }
+
+            if (tagsList.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    tagsList.forEach { tag ->
+                        InputChip(
+                            selected = true,
+                            onClick = {},
+                            label = { Text("#$tag") },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        tagsList = tagsList.filterNot { it.equals(tag, ignoreCase = true) }
+                                    },
+                                    modifier = Modifier.size(16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Remove tag",
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
                             }
                         )
                     }
@@ -556,7 +711,9 @@ fun AddEditPlaceSheet(
                             selectedLat,
                             selectedLng,
                             selectedRadius,
-                            reelUrl.ifBlank { null }
+                            reelUrl.ifBlank { null },
+                            tagsList.joinToString(","),
+                            selectedFolderId
                         )
                     }
                 },
@@ -597,6 +754,43 @@ fun AddEditPlaceSheet(
             dismissButton = {
                 TextButton(onClick = { showDiscardDialog = false }) {
                     Text("Keep Editing")
+                }
+            }
+        )
+    }
+
+    // Quick Create Folder Dialog
+    if (isCreateFolderDialogOpen) {
+        var quickFolderName by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { isCreateFolderDialogOpen = false },
+            title = { Text("Create Folder") },
+            text = {
+                OutlinedTextField(
+                    value = quickFolderName,
+                    onValueChange = { quickFolderName = it },
+                    label = { Text("Folder Name") },
+                    placeholder = { Text("e.g. Travel, Food, Study") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (quickFolderName.isNotBlank()) {
+                            onCreateFolder?.invoke(quickFolderName.trim())
+                            isCreateFolderDialogOpen = false
+                        }
+                    },
+                    enabled = quickFolderName.isNotBlank()
+                ) {
+                    Text("Create")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isCreateFolderDialogOpen = false }) {
+                    Text("Cancel")
                 }
             }
         )

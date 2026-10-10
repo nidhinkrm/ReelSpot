@@ -46,7 +46,7 @@ object NotificationHelper {
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("ReelSpot Nearby!")
             .setContentText("You saved $placeName on ReelSpot. You're nearby!")
             .setStyle(

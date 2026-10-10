@@ -77,7 +77,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.mipmap.ic_launcher),
+                    painter = painterResource(id = R.drawable.app_logo),
                     contentDescription = "ReelSpot App Logo",
                     modifier = Modifier
                         .size(52.dp)

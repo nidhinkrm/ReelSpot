@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\mipmap_ic_launcher.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\mipmap\\ic_launcher.xml"
+    },
+    {
+        "merged": "com.reelspot.app-debug-60:/mipmap_ic_launcher.xml.flat",
+        "source": "com.reelspot.app-main-62:/mipmap/ic_launcher.xml"
+    },
+    {
+        "merged": "com.reelspot.app-debug-60:/mipmap_ic_launcher_round.xml.flat",
+        "source": "com.reelspot.app-main-62:/mipmap/ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\mipmap_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\mipmap\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-debug-60:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\laksh\\.gradle\\daemon\\8.11.1\\com.reelspot.app-main-62:\\drawable\\ic_launcher_background.xml"
+    }
+]

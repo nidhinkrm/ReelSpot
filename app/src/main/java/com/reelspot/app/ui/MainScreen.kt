@@ -130,6 +130,7 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
             AddEditPlaceSheet(
                 editingPlace = editingPlace,
                 initialReelUrl = pastedReelUrl,
+                currentLocation = currentLocation,
                 onDismiss = { viewModel.closeAddEditSheet() },
                 onSave = { id, name, description, category, lat, lng, radius, url ->
                     viewModel.savePlace(id, name, description, category, lat, lng, radius, url)

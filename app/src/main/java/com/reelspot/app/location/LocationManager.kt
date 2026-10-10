@@ -16,8 +16,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.coroutines.resume
 
 class LocationManager(private val context: Context) {
 
@@ -64,17 +67,25 @@ class LocationManager(private val context: Context) {
     }
 
     suspend fun searchAddress(query: String): List<Address> = withContext(Dispatchers.IO) {
-        if (query.isBlank()) return@withContext emptyList()
+        if (query.isBlank() || !Geocoder.isPresent()) return@withContext emptyList()
         try {
             val geocoder = Geocoder(context, Locale.getDefault())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                var results = emptyList<Address>()
-                geocoder.getFromLocationName(query, 5) { addresses ->
-                    results = addresses
-                }
-                // Small pause for listener callback in Async geocoder
-                kotlinx.coroutines.delay(300)
-                results
+                withTimeoutOrNull(4000L) {
+                    suspendCancellableCoroutine<List<Address>> { continuation ->
+                        try {
+                            geocoder.getFromLocationName(query, 5) { addresses ->
+                                if (continuation.isActive) {
+                                    continuation.resume(addresses)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            if (continuation.isActive) {
+                                continuation.resume(emptyList())
+                            }
+                        }
+                    }
+                } ?: emptyList()
             } else {
                 @Suppress("DEPRECATION")
                 geocoder.getFromLocationName(query, 5) ?: emptyList()
@@ -86,13 +97,27 @@ class LocationManager(private val context: Context) {
 
     suspend fun getAddressFromCoordinates(latitude: Double, longitude: Double): String =
         withContext(Dispatchers.IO) {
+            if (!Geocoder.isPresent()) {
+                return@withContext "%.4f, %.4f".format(latitude, longitude)
+            }
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())
                 val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    var list = emptyList<Address>()
-                    geocoder.getFromLocation(latitude, longitude, 1) { list = it }
-                    kotlinx.coroutines.delay(200)
-                    list
+                    withTimeoutOrNull(4000L) {
+                        suspendCancellableCoroutine<List<Address>> { continuation ->
+                            try {
+                                geocoder.getFromLocation(latitude, longitude, 1) { list ->
+                                    if (continuation.isActive) {
+                                        continuation.resume(list)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                if (continuation.isActive) {
+                                    continuation.resume(emptyList())
+                                }
+                            }
+                        }
+                    } ?: emptyList()
                 } else {
                     @Suppress("DEPRECATION")
                     geocoder.getFromLocation(latitude, longitude, 1) ?: emptyList()

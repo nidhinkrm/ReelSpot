@@ -156,7 +156,14 @@ fun PlaceDetailSheet(
             ) {
                 GoogleMap(
                     modifier = Modifier.fillMaxWidth(),
-                    cameraPositionState = cameraPositionState
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = com.google.maps.android.compose.MapUiSettings(
+                        zoomControlsEnabled = false,
+                        scrollGesturesEnabled = false,
+                        zoomGesturesEnabled = false,
+                        tiltGesturesEnabled = false,
+                        rotationGesturesEnabled = false
+                    )
                 ) {
                     Marker(
                         state = MarkerState(position = placeLatLng),

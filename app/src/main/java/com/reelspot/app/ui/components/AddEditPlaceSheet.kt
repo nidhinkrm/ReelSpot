@@ -1,6 +1,6 @@
 package com.reelspot.app.ui.components
 
-import android.content.Context
+import android.location.Location
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,6 +58,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -73,6 +75,7 @@ val RADIUS_OPTIONS = listOf(500f, 1000f, 2000f) // meters
 fun AddEditPlaceSheet(
     editingPlace: SavedPlace?,
     initialReelUrl: String,
+    currentLocation: Location? = null,
     onDismiss: () -> Unit,
     onSave: (
         id: Long,
@@ -99,11 +102,12 @@ fun AddEditPlaceSheet(
     var selectedRadius by remember { mutableStateOf(editingPlace?.radius ?: 500f) }
     var reelUrl by remember { mutableStateOf(editingPlace?.reelUrl ?: initialReelUrl) }
 
-    // Map & Location picking state
+    // Map & Location picking state: prioritize existing place, then user current location, fallback to default
     var selectedLatLng by remember {
         mutableStateOf(
             if (editingPlace != null) LatLng(editingPlace.latitude, editingPlace.longitude)
-            else LatLng(37.7749, -122.4194) // Default fallback (e.g. San Francisco)
+            else if (currentLocation != null) LatLng(currentLocation.latitude, currentLocation.longitude)
+            else LatLng(37.7749, -122.4194)
         )
     }
     var addressText by remember { mutableStateOf("") }
@@ -111,6 +115,14 @@ fun AddEditPlaceSheet(
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedLatLng, 15f)
+    }
+
+    LaunchedEffect(currentLocation) {
+        if (editingPlace == null && currentLocation != null && selectedLatLng == LatLng(37.7749, -122.4194)) {
+            val userLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+            selectedLatLng = userLatLng
+            cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(userLatLng, 15f))
+        }
     }
 
     LaunchedEffect(selectedLatLng) {
@@ -348,6 +360,8 @@ fun AddEditPlaceSheet(
                 GoogleMap(
                     modifier = Modifier.matchParentSize(),
                     cameraPositionState = cameraPositionState,
+                    properties = MapProperties(isMyLocationEnabled = currentLocation != null),
+                    uiSettings = MapUiSettings(zoomControlsEnabled = true, myLocationButtonEnabled = currentLocation != null),
                     onMapClick = { latLng ->
                         selectedLatLng = latLng
                     }

@@ -46,7 +46,7 @@
         android:theme="@style/Theme.Reelspot" >
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBDEf-8a53b3xHTM-oDk13wvVff_SNmfGw" />
+            android:value="AIzaSyAjbpEtRPpfl4gr3qTo71tbandpBQHHaqs" />
 
         <activity
             android:name="com.reelspot.app.MainActivity"

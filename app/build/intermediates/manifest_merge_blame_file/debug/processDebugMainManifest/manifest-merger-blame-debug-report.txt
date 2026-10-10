@@ -79,7 +79,7 @@
 47        <meta-data
 48            android:name="com.google.android.geo.API_KEY"
 48-->C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:20:13-58
-49            android:value="AIzaSyBDEf-8a53b3xHTM-oDk13wvVff_SNmfGw" />
+49            android:value="AIzaSyAjbpEtRPpfl4gr3qTo71tbandpBQHHaqs" />
 49-->C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:21:13-44
 50
 51        <activity

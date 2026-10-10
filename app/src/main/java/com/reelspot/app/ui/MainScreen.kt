@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import com.reelspot.app.ui.components.AddEditPlaceSheet
 import com.reelspot.app.ui.components.PermissionHandler
 import com.reelspot.app.ui.components.PlaceDetailSheet
+import com.reelspot.app.ui.components.ShareReelConfirmSheet
 import com.reelspot.app.ui.home.HomeScreen
 import com.reelspot.app.ui.map.MapScreen
 import com.reelspot.app.ui.saved.SavedPlacesScreen
@@ -48,6 +49,7 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
     val pastedReelUrl by viewModel.pastedReelUrl.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
     val isSearchingAddress by viewModel.isSearchingAddress.collectAsState()
+    val sharedReelUrl by viewModel.sharedReelUrl.collectAsState()
 
     PermissionHandler(
         onPermissionsGranted = {
@@ -123,6 +125,19 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                     }
                 }
             }
+        }
+
+        // Share Reel Confirmation Sheet (shown when URL arrives via Android share intent)
+        sharedReelUrl?.let { _ ->
+            ShareReelConfirmSheet(
+                sharedUrl = sharedReelUrl ?: "",
+                onConfirm = { confirmedUrl ->
+                    // Clear the shared state and open AddEditPlaceSheet with the confirmed URL
+                    viewModel.clearSharedReelUrl()
+                    viewModel.openAddPlaceSheet(initialReelUrl = confirmedUrl)
+                },
+                onDismiss = { viewModel.clearSharedReelUrl() }
+            )
         }
 
         // Add/Edit Place Bottom Sheet

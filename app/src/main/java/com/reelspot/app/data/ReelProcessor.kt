@@ -15,9 +15,28 @@ object ReelProcessor {
                 trimmed.startsWith("https://instagram.com/p/")
     }
 
-    fun cleanUrl(url: String): String {
-        val trimmed = url.trim()
-        val queryIndex = trimmed.indexOf("?")
-        return if (queryIndex != -1) trimmed.substring(0, queryIndex) else trimmed
+    /**
+     * Extracts and cleans a URL from potentially mixed shared text.
+     *
+     * Instagram's "Share" action sometimes sends text like:
+     *   "Check out this place!\nhttps://www.instagram.com/reel/XYZ/?igsh=abc"
+     *
+     * This function:
+     * 1. Scans for the first HTTP/HTTPS URL in the shared text.
+     * 2. Strips tracking query parameters (e.g. ?igsh=...) from the URL.
+     * 3. Falls back to the original trimmed text if no URL is found.
+     */
+    fun cleanUrl(sharedText: String): String {
+        val trimmed = sharedText.trim()
+
+        // Try to find the first http/https URL in the text
+        val urlRegex = Regex("""https?://[^\s]+""")
+        val match = urlRegex.find(trimmed)
+        val urlCandidate = match?.value ?: trimmed
+
+        // Strip query string and fragment
+        val withoutQuery = urlCandidate.substringBefore("?").substringBefore("#")
+
+        return withoutQuery.trimEnd('/')
     }
 }

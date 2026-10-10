@@ -45,6 +45,10 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
     private val _pastedReelUrl = MutableStateFlow("")
     val pastedReelUrl: StateFlow<String> = _pastedReelUrl.asStateFlow()
 
+    // Holds a URL received via Android share intent – shown in the ShareReelScreen
+    private val _sharedReelUrl = MutableStateFlow<String?>(null)
+    val sharedReelUrl: StateFlow<String?> = _sharedReelUrl.asStateFlow()
+
     private val _searchResults = MutableStateFlow<List<Address>>(emptyList())
     val searchResults: StateFlow<List<Address>> = _searchResults.asStateFlow()
 
@@ -199,5 +203,30 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
                 _selectedPlaceForDetails.value = place
             }
         }
+    }
+
+    /**
+     * Called from MainActivity when the app receives an ACTION_SEND intent.
+     * Extracts and stores the shared text/URL for confirmation in the UI.
+     */
+    fun handleSharedIntent(sharedText: String?) {
+        if (sharedText.isNullOrBlank()) return
+        val cleaned = com.reelspot.app.data.ReelProcessor.cleanUrl(sharedText)
+        _sharedReelUrl.value = if (cleaned.isNotBlank()) cleaned else sharedText.trim()
+    }
+
+    /** Dismiss the ShareReel confirmation screen without saving. */
+    fun clearSharedReelUrl() {
+        _sharedReelUrl.value = null
+    }
+
+    /**
+     * User confirmed the shared URL – open the AddEditPlaceSheet with the URL pre-filled
+     * and clear the shared URL state so the confirm screen closes.
+     */
+    fun confirmSharedReelUrl() {
+        val url = _sharedReelUrl.value ?: return
+        clearSharedReelUrl()
+        openAddPlaceSheet(initialReelUrl = url)
     }
 }

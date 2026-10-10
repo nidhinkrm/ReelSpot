@@ -7,10 +7,10 @@ INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManife
 	android:name
 		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:20:13-58
 manifest
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-40:12
-INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-40:12
-INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-40:12
-INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-40:12
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:2:1-50:12
 MERGED from [com.google.maps.android:maps-compose:6.2.1] C:\Users\laksh\.gradle\caches\8.11.1\transforms\1af9d2154139a87a1339706b322673de\transformed\maps-compose-6.2.1\AndroidManifest.xml:17:1-22:12
 MERGED from [com.google.android.gms:play-services-location:21.3.0] C:\Users\laksh\.gradle\caches\8.11.1\transforms\ea656295d5388c356be85d40feb3d14a\transformed\play-services-location-21.3.0\AndroidManifest.xml:2:1-8:12
 MERGED from [com.google.maps.android:maps-ktx:5.1.1] C:\Users\laksh\.gradle\caches\8.11.1\transforms\88a08e59caef35a4209c7b89e988c20b\transformed\maps-ktx-5.1.1\AndroidManifest.xml:18:1-23:12
@@ -111,8 +111,8 @@ ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.
 	android:name
 		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:8:22-74
 application
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:10:5-38:19
-INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:10:5-38:19
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:10:5-48:19
+INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:10:5-48:19
 MERGED from [com.google.android.gms:play-services-location:21.3.0] C:\Users\laksh\.gradle\caches\8.11.1\transforms\ea656295d5388c356be85d40feb3d14a\transformed\play-services-location-21.3.0\AndroidManifest.xml:6:5-20
 MERGED from [com.google.android.gms:play-services-location:21.3.0] C:\Users\laksh\.gradle\caches\8.11.1\transforms\ea656295d5388c356be85d40feb3d14a\transformed\play-services-location-21.3.0\AndroidManifest.xml:6:5-20
 MERGED from [com.google.android.gms:play-services-maps:19.0.0] C:\Users\laksh\.gradle\caches\8.11.1\transforms\18e33629bda9a487faafd2c44fc02a9e\transformed\play-services-maps-19.0.0\AndroidManifest.xml:36:5-42:19
@@ -156,31 +156,47 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\la
 	android:name
 		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:11:9-44
 activity#com.reelspot.app.MainActivity
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:23:9-31:20
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:23:9-41:20
+	android:launchMode
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:26:13-44
 	android:exported
 		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:25:13-36
 	android:theme
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:26:13-50
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:27:13-50
 	android:name
 		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:24:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:27:13-30:29
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:30:13-33:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:28:17-69
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:31:17-69
 	android:name
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:28:25-66
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:31:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:29:17-77
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:32:17-77
 	android:name
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:29:27-74
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:32:27-74
+intent-filter#action:name:android.intent.action.SEND+category:name:android.intent.category.DEFAULT+data:mimeType:text/plain
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:36:13-40:29
+action#android.intent.action.SEND
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:37:17-69
+	android:name
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:37:25-66
+category#android.intent.category.DEFAULT
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:38:17-76
+	android:name
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:38:27-73
+data
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:39:17-55
+	android:mimeType
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:39:23-52
 receiver#com.reelspot.app.location.GeofenceBroadcastReceiver
-ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:33:9-36:39
+ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:43:9-46:39
 	android:enabled
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:35:13-35
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:45:13-35
 	android:exported
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:36:13-36
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:46:13-36
 	android:name
-		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:34:13-63
+		ADDED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml:44:13-63
 uses-sdk
 INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\laksh\Videos\Captures\Reelspot\app\src\main\AndroidManifest.xml

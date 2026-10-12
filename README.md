@@ -77,7 +77,7 @@ Ideas, feedback, and constructive criticism are always welcome.
 
 ## 👥 Credits
 
-The initial idea for ReelSpot came from a conversation with a friend [@jasif6767](https://github.com/jasif6767)
+The initial idea for ReelSpot came from a conversation with a friend [@jasif](https://github.com/jasif6767)
  about forgetting places saved from Instagram Reels.
 
 I'm developing the application and bringing that idea to life through code. I'm grateful for the conversation that sparked the project.

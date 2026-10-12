@@ -36,8 +36,14 @@ interface SavedPlaceDao {
     @Query("UPDATE saved_places SET tags = :tags WHERE id = :placeId")
     suspend fun updatePlaceTags(placeId: Long, tags: String)
 
+    @Query("SELECT * FROM saved_places ORDER BY createdAt DESC")
+    suspend fun getAllPlacesList(): List<SavedPlace>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlace(place: SavedPlace): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlaces(places: List<SavedPlace>): List<Long>
 
     @Update
     suspend fun updatePlace(place: SavedPlace)
@@ -47,4 +53,7 @@ interface SavedPlaceDao {
 
     @Query("DELETE FROM saved_places WHERE id = :id")
     suspend fun deletePlaceById(id: Long)
+
+    @Query("DELETE FROM saved_places")
+    suspend fun deleteAllPlaces()
 }

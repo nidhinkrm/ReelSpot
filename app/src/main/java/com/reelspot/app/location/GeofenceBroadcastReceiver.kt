@@ -27,6 +27,12 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
             geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL
         ) {
+            // Respect user preference: if Nearby Alerts are disabled, suppress notifications
+            if (!com.reelspot.app.data.SettingsManager.isNearbyAlertsEnabledSync(context)) {
+                android.util.Log.d("GeofenceReceiver", "Nearby Alerts are turned OFF; suppressing notification")
+                return
+            }
+
             val triggeringGeofences = geofencingEvent.triggeringGeofences ?: return
 
             val pendingResult = goAsync()

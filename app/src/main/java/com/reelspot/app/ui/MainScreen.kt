@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +31,13 @@ import com.reelspot.app.ui.components.ShareReelConfirmSheet
 import com.reelspot.app.ui.home.HomeScreen
 import com.reelspot.app.ui.map.MapScreen
 import com.reelspot.app.ui.saved.SavedPlacesScreen
+import com.reelspot.app.ui.settings.SettingsScreen
 
 enum class ScreenRoute(val title: String) {
     HOME("Home"),
     MAP("Map"),
-    SAVED("Saved")
+    SAVED("Saved"),
+    SETTINGS("Settings")
 }
 
 @Composable
@@ -96,15 +99,23 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                         icon = { Icon(imageVector = Icons.Default.Bookmark, contentDescription = "Saved") },
                         label = { Text("Saved") }
                     )
+                    NavigationBarItem(
+                        selected = currentRoute == ScreenRoute.SETTINGS,
+                        onClick = { currentRoute = ScreenRoute.SETTINGS },
+                        icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings") },
+                        label = { Text("Settings") }
+                    )
                 }
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { viewModel.openAddPlaceSheet() },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Place")
+                if (currentRoute != ScreenRoute.SETTINGS) {
+                    FloatingActionButton(
+                        onClick = { viewModel.openAddPlaceSheet() },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Place")
+                    }
                 }
             }
         ) { innerPadding ->
@@ -117,7 +128,8 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                             onAddPlaceClick = { viewModel.openAddPlaceSheet() },
                             onViewMapClick = { currentRoute = ScreenRoute.MAP },
                             onSaveFromReelUrl = { url -> viewModel.openAddPlaceSheet(url) },
-                            onPlaceClick = { place -> viewModel.selectPlaceDetails(place) }
+                            onPlaceClick = { place -> viewModel.selectPlaceDetails(place) },
+                            onOpenSettingsClick = { currentRoute = ScreenRoute.SETTINGS }
                         )
                     }
 
@@ -150,6 +162,13 @@ fun MainScreen(viewModel: ReelSpotViewModel) {
                             onPlaceClick = { place -> viewModel.selectPlaceDetails(place) },
                             onEditPlace = { place -> viewModel.openEditPlaceSheet(place) },
                             onDeletePlace = { place -> viewModel.deletePlace(place) }
+                        )
+                    }
+
+                    ScreenRoute.SETTINGS -> {
+                        SettingsScreen(
+                            viewModel = viewModel,
+                            onNavigateBack = { currentRoute = ScreenRoute.HOME }
                         )
                     }
                 }

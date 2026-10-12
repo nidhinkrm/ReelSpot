@@ -1,15 +1,20 @@
 package com.reelspot.app.ui
 
 import android.app.Application
+import android.content.Context
 import android.location.Address
 import android.location.Location
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.reelspot.app.data.AppDatabase
+import com.reelspot.app.data.BackupManager
+import com.reelspot.app.data.ImportMode
 import com.reelspot.app.data.PlaceFolder
 import com.reelspot.app.data.PlaceRepository
 import com.reelspot.app.data.ReelProcessor
 import com.reelspot.app.data.SavedPlace
+import com.reelspot.app.data.SettingsManager
 import com.reelspot.app.location.GeofenceManager
 import com.reelspot.app.location.LocationManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,10 +37,13 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
     private val repository: PlaceRepository
     val locationManager: LocationManager
     private val geofenceManager: GeofenceManager
+    val settingsManager: SettingsManager
+    val backupManager: BackupManager
 
     val savedPlaces: StateFlow<List<SavedPlace>>
     val folders: StateFlow<List<PlaceFolder>>
     val currentLocation: StateFlow<Location?>
+    val nearbyAlertsEnabled: StateFlow<Boolean>
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -87,6 +95,9 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
         repository = PlaceRepository(database.savedPlaceDao(), database.placeFolderDao())
         locationManager = LocationManager(application)
         geofenceManager = GeofenceManager(application)
+        settingsManager = SettingsManager(application)
+        backupManager = BackupManager(database, database.savedPlaceDao(), database.placeFolderDao())
+        nearbyAlertsEnabled = settingsManager.nearbyAlertsEnabled
 
         savedPlaces = repository.allPlaces.stateIn(
             scope = viewModelScope,
@@ -102,16 +113,31 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
 
         currentLocation = locationManager.currentLocation
 
-        // Keep geofences synced when places change
+        // Keep geofences synced when places change (only if Nearby Alerts is enabled)
         viewModelScope.launch {
             savedPlaces.collect { places ->
-                geofenceManager.updateGeofences(places)
+                if (settingsManager.nearbyAlertsEnabled.value) {
+                    geofenceManager.updateGeofences(places)
+                } else {
+                    geofenceManager.removeAllGeofences()
+                }
                 // Keep selected detail place updated if it was modified
                 _selectedPlaceForDetails.value?.let { currentDetail ->
                     val updated = places.find { it.id == currentDetail.id }
                     if (updated != null) {
                         _selectedPlaceForDetails.value = updated
                     }
+                }
+            }
+        }
+
+        // React when user toggles Nearby Alerts ON / OFF
+        viewModelScope.launch {
+            settingsManager.nearbyAlertsEnabled.collect { enabled ->
+                if (enabled) {
+                    geofenceManager.updateGeofences(savedPlaces.value)
+                } else {
+                    geofenceManager.removeAllGeofences()
                 }
             }
         }
@@ -262,7 +288,9 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
                 folderId = folderId
             )
             val savedId = repository.savePlace(place)
-            geofenceManager.addGeofenceForPlace(place.copy(id = savedId))
+            if (settingsManager.nearbyAlertsEnabled.value) {
+                geofenceManager.addGeofenceForPlace(place.copy(id = savedId))
+            }
             closeAddEditSheet()
             _userFeedbackMessage.value = if (id == 0L) "Spot saved successfully!" else "Spot updated!"
         }
@@ -397,5 +425,59 @@ class ReelSpotViewModel(application: Application) : AndroidViewModel(application
         val url = _sharedReelUrl.value ?: return
         clearSharedReelUrl()
         openAddPlaceSheet(initialReelUrl = url)
+    }
+
+    // --- Settings & Nearby Alerts Control ---
+
+    fun setNearbyAlertsEnabled(enabled: Boolean) {
+        settingsManager.setNearbyAlertsEnabled(enabled)
+        if (enabled) {
+            geofenceManager.updateGeofences(savedPlaces.value)
+            _userFeedbackMessage.value = "Nearby Alerts turned ON"
+        } else {
+            geofenceManager.removeAllGeofences()
+            _userFeedbackMessage.value = "Nearby Alerts turned OFF"
+        }
+    }
+
+    // --- Data & Backup Operations ---
+
+    fun exportBackup(context: Context, destinationUri: Uri, onResult: (Boolean, String) -> Unit) {
+        viewModelScope.launch {
+            val result = backupManager.exportBackup(context, destinationUri)
+            result.onSuccess {
+                _userFeedbackMessage.value = "ReelSpot data exported successfully."
+                onResult(true, "ReelSpot data exported successfully.")
+            }.onFailure { error ->
+                val msg = error.message ?: "Failed to export data."
+                _userFeedbackMessage.value = msg
+                onResult(false, msg)
+            }
+        }
+    }
+
+    fun importBackup(
+        context: Context,
+        sourceUri: Uri,
+        mode: ImportMode,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = backupManager.importBackup(context, sourceUri, mode)
+            result.onSuccess { summary ->
+                val modeDesc = if (mode == ImportMode.REPLACE) "Replaced all data with" else "Successfully imported"
+                val msg = "$modeDesc ${summary.placesImported} places and ${summary.foldersImported} folders."
+                _userFeedbackMessage.value = msg
+                onResult(true, msg)
+                // If Nearby Alerts is enabled, ensure newly imported places are registered in geofencing
+                if (settingsManager.nearbyAlertsEnabled.value) {
+                    geofenceManager.updateGeofences(savedPlaces.value)
+                }
+            }.onFailure { error ->
+                val msg = error.message ?: "Failed to import backup."
+                _userFeedbackMessage.value = msg
+                onResult(false, msg)
+            }
+        }
     }
 }

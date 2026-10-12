@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -59,7 +60,8 @@ fun HomeScreen(
     onAddPlaceClick: () -> Unit,
     onViewMapClick: () -> Unit,
     onSaveFromReelUrl: (String) -> Unit,
-    onPlaceClick: (SavedPlace) -> Unit
+    onPlaceClick: (SavedPlace) -> Unit,
+    onOpenSettingsClick: (() -> Unit)? = null
 ) {
     val clipboardManager = LocalClipboardManager.current
     var inputReelUrl by remember { mutableStateOf("") }
@@ -95,6 +97,15 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+                if (onOpenSettingsClick != null) {
+                    IconButton(onClick = onOpenSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

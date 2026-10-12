@@ -40,6 +40,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -66,4 +69,6 @@ dependencies {
     implementation(libs.maps.compose)
 
     implementation(libs.accompanist.permissions)
+
+    testImplementation("junit:junit:4.13.2")
 }

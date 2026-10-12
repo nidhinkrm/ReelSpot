@@ -96,4 +96,22 @@ class GeofenceManager(private val context: Context) {
             e.printStackTrace()
         }
     }
+
+    /**
+     * Unregisters all active geofences from the Android location subsystem.
+     * Called when the user switches Nearby Alerts to OFF.
+     */
+    fun removeAllGeofences() {
+        try {
+            geofencingClient.removeGeofences(geofencePendingIntent)
+                .addOnSuccessListener {
+                    android.util.Log.d("GeofenceManager", "All geofences successfully unregistered")
+                }
+                .addOnFailureListener { e ->
+                    android.util.Log.e("GeofenceManager", "Failed to remove geofences: ${e.message}")
+                }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
 }

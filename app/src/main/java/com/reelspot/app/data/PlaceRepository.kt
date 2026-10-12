@@ -78,4 +78,18 @@ class PlaceRepository(
             folderDao.deleteFolder(folder)
         }
     }
+
+    // --- Bulk & Backup Operations ---
+
+    suspend fun getAllPlacesList(): List<SavedPlace> = placeDao.getAllPlacesList()
+
+    suspend fun getAllFoldersList(): List<PlaceFolder> = folderDao.getAllFoldersList()
+
+    suspend fun insertPlaces(places: List<SavedPlace>): List<Long> = placeDao.insertPlaces(places)
+
+    suspend fun insertFolders(folders: List<PlaceFolder>): List<Long> = folderDao.insertFolders(folders)
+
+    suspend fun deleteAllPlaces() = placeDao.deleteAllPlaces()
+
+    suspend fun deleteAllFolders() = folderDao.deleteAllFolders()
 }

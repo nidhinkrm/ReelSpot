@@ -51,7 +51,9 @@ abstract class AppDatabase : RoomDatabase() {
                     "reelspot_database"
                 )
                     .addMigrations(MIGRATION_1_2)
-                    .fallbackToDestructiveMigration()
+                    // Explicitly DO NOT call fallbackToDestructiveMigration():
+                    // Ensures all user-created places, notes, tags, and coordinates
+                    // are never deleted or cleared when installing newer app versions.
                     .build()
                 INSTANCE = instance
                 instance

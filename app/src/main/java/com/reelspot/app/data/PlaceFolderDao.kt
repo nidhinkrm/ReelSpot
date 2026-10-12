@@ -20,14 +20,23 @@ interface PlaceFolderDao {
     @Query("SELECT * FROM place_folders WHERE LOWER(TRIM(name)) = LOWER(TRIM(:name)) LIMIT 1")
     suspend fun getFolderByName(name: String): PlaceFolder?
 
+    @Query("SELECT * FROM place_folders ORDER BY name COLLATE NOCASE ASC")
+    suspend fun getAllFoldersList(): List<PlaceFolder>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFolder(folder: PlaceFolder): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFolders(folders: List<PlaceFolder>): List<Long>
 
     @Update
     suspend fun updateFolder(folder: PlaceFolder)
 
     @Delete
     suspend fun deleteFolder(folder: PlaceFolder)
+
+    @Query("DELETE FROM place_folders")
+    suspend fun deleteAllFolders()
 
     /**
      * V3 Safety Guarantee:

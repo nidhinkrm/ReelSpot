@@ -84,7 +84,7 @@ I'm developing the application and bringing that idea to life through code. I'm 
 
 ## 📄 License
 
-A license has not been specified yet. Please check the repository for licensing and reuse permissions.
+A license has not been specified yet. Please check the repository for licensing and reuse permissions Or do contact at help.webapp@outlook.com
 
 ---
 

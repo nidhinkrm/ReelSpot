@@ -60,7 +60,7 @@ These are planned improvements, not promises that every feature is already avail
 
 To try ReelSpot:
 
-1. Download the latest APK from the project's Releases page, when available.
+1. Download the latest APK from the project's Releases page or from  [ReelSpot_Download](https://reel-spot.netlify.app).
 2. Install it on your Android device.
 3. Grant location and notification permissions if you want to use nearby reminders.
 4. Start saving places you'd like to visit.
